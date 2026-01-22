@@ -1,0 +1,9 @@
+description: "E6 - Ablation: No Physics (pure data-driven FSL+DA)"
+dataset: bosch
+scenario: ablation
+method: "pi_fsl"
+variant: "wo_physics"
+few_shot:
+  n_way: 2
+  k_shot: 5
+  q_query: 16

@@ -1,0 +1,13 @@
+description: "E9 - Cross-component Transfer: CWRU Bearing -> Bosch CNC"
+source:
+  dataset: cwru
+  domain: "ALL"
+target:
+  dataset: bosch
+  domain: "M01_OP07"
+few_shot:
+  n_way: 2
+  k_shot: 5
+  q_query: 16
+notes:
+  - "Use CWRU as bearing source pool, Bosch as milling/drilling target."

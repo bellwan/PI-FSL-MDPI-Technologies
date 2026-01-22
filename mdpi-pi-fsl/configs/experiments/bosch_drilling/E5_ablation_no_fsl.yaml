@@ -1,0 +1,7 @@
+description: "E5 - Ablation: No FSL (DA with ample target data)"
+dataset: bosch
+scenario: ablation
+target_domain: "M01_OP07"
+method: "da_supervised"
+notes:
+  - "Use abundant labeled target data; removes few-shot constraint."

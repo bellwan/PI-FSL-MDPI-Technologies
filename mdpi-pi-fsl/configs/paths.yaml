@@ -1,0 +1,93 @@
+datasets:
+  bosch_drilling_root: "D:/jb/datasets/bosch_drilling"
+  cwru_root: "D:/jb/datasets/cwru_bearing"
+  hust_cn_root: "D:/jb/datasets/hust_cn"
+  hust_vn_root: "D:/jb/datasets/hust_vn"
+  pu_root: "D:/jb/datasets/pu_bearing"
+  bosch_mi_root: "D:/jb/datasets/bosch_milling"
+
+artifacts:
+  root: "D:/jb/mdpi-v08/artifacts"
+  results_jsonl_dir: "D:/jb/mdpi-v08/artifacts/results/jsonl"
+  tables_dir: "D:/jb/mdpi-v08/artifacts/results/tables"
+  figures_dir: "D:/jb/mdpi-v08/artifacts/figures"
+  models_dir: "D:/jb/mdpi-v08/artifacts/models"
+
+defaults:
+  device: "cuda"
+  seeds: [1, 2, 3]
+  train_episodes: 500
+  eval_episodes: 200
+  normalization: "per_window"
+
+phase_a:
+  bosch_yaml_dir: "configs/experiments/bosch_drilling"
+  bosch_yaml_files:
+    - "E1_cross_machine.yaml"
+    - "E2_cross_operation.yaml"
+    - "E3_cross_machine_operation.yaml"
+    - "E4_multi_source_to_target.yaml"
+  results_jsonl: "artifacts/results/jsonl/phase_a_bosch_e1_e4.jsonl"
+
+phase_b:
+  legacy_experiments: ["E9"]
+  results_jsonl: "artifacts/results/jsonl/phase_b_swap.jsonl"
+
+phase_c:
+  results_jsonl: "artifacts/results/jsonl/support_suite_5x4.jsonl"
+  tables_dir: "artifacts/results/tables/support_suite_5x4"
+
+  suite:
+    - dataset: bosch
+      data_root: bosch_drilling_root
+      source_domain: M01_OP07
+      target_domain: M02_OP05
+      q_query: 16
+      extra_args: ["--normalization", "per_window"]
+      exp_id: SUP_BOSCH_E3
+      scenario: BoschDrilling_E3_M01_OP07_to_M02_OP05_2way_5shot
+
+    - dataset: cwru
+      data_root: cwru_root
+      source_domain: "0"
+      target_domain: "3"
+      q_query: 10
+      extra_args: ["--label_mode", "binary", "--cwru_pos_label", "1", "--cwru_time_steps", "1024", "--normalization", "per_window"]
+      exp_id: SUP_CWRU_0_to_3
+      scenario: CWRU12k_0_to_3_2way_5shot
+
+    - dataset: pu
+      data_root: pu_root
+      source_domain: N09_M07_F10
+      target_domain: N15_M01_F10
+      q_query: 10
+      extra_args: ["--pu_healthy_code", "K001", "--pu_pos_code", "KI14", "--pu_max_windows_per_file", "50", "--normalization", "per_window"]
+      exp_id: SUP_PU_SHIFT
+      scenario: PU_setting_shift_2way_5shot
+
+    - dataset: hust_cn
+      data_root: hust_cn_root
+      source_domain: "20Hz"
+      target_domain: "80Hz"
+      q_query: 10
+      extra_args: ["--label_mode", "multiclass", "--normalization", "per_window"]
+      exp_id: SUP_HUST_CN_FREQ_SHIFT
+      scenario: HUSTCN_20Hz_to_80Hz_2way_5shot_multiclass
+
+    - dataset: hust_vn
+      data_root: hust_vn_root
+      source_domain: "0"
+      target_domain: "200"
+      q_query: 10
+      extra_args: ["--hust_vn_domain_axis", "load", "--label_mode", "simple", "--normalization", "per_window"]
+      exp_id: SUP_HUST_VN_LOAD_SHIFT
+      scenario: HUSTVN_load_0_to_200_2way_5shot_simple
+
+    - dataset: bosch_mi
+      data_root: bosch_mi_root
+      source_domain: "AUTO"
+      target_domain: "AUTO"
+      q_query: 10
+      extra_args: ["--normalization", "zscore", "--bosch_mi_label_mode", "3class", "--bosch_mi_drop_mid"]
+      exp_id: SUP_MILLING_tool_shift
+      scenario: BoschMilling_AUTO_to_AUTO_2way_5shot_dropmid

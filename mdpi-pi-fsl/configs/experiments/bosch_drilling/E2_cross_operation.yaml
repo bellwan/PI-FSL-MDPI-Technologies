@@ -1,0 +1,113 @@
+description: "E2 - Cross-operation generalization on M01 (OP07 → OP05)"
+seeds: [42, 123, 456, 789, 101112]
+
+# -----------------------------
+# 1. Domain specifications
+# -----------------------------
+source_domains:
+  - machine: "M01"
+    operation: "OP07"
+    # worn > 0 at [Aug-19, Aug-21, Feb-19]
+    periods: ["Aug-19", "Feb-19", "Aug-21"]
+    description: "Source operation OP07 on M01"
+
+target_domains:
+  - machine: "M01"
+    operation: "OP05"
+    # worn > 0 at [Aug-19, Feb-19, Feb-21]
+    periods: ["Aug-19", "Feb-19", "Feb-21"]
+    description: "Target operation OP05 on same machine M01"
+
+# -----------------------------
+# 2. Few-shot configuration
+# -----------------------------
+few_shot_setting:
+  n_way: 2
+  k_shot: [1, 5]
+  query_size: 15
+  episodes: 1200
+  validation_episodes: 200
+
+# -----------------------------
+# 3. Model configuration
+# -----------------------------
+model_config:
+  name: "RelationNet"
+  channels: [32, 32, 64, 64]
+
+# -----------------------------
+# 4. Training configuration
+# -----------------------------
+training_config:
+  optimizer: "Adam"
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  scheduler: "StepLR"
+  step_size: 400
+  gamma: 0.5
+  early_stopping_patience: 50
+  gradient_clipping: 1.0
+
+  transfer_learning:
+    enabled: true
+    episodes: 200
+    k_shot: 5
+    query_size: 15
+    learning_rate: 0.0005
+    weight_decay: 0.0001
+    step_size: 100
+    gamma: 0.5
+
+# -----------------------------
+# 5. Physics regularization
+# -----------------------------
+physics_regularization:
+  enabled: true
+  lambda_energy: 0.1
+  lambda_spectral: 0.1
+  lambda_envelope: 0.05
+  spectral_bands:
+    structural: [0, 75]
+    bearing: [75, 300]
+    tool_wear: [300, 1000]
+
+# -----------------------------
+# 6. Evaluation configuration
+# -----------------------------
+evaluation_config:
+  episodes: 200
+
+# -----------------------------
+# 7. Baseline methods
+# -----------------------------
+baselines:
+  - name: "Standard_FSL"
+    enabled: false
+    strategy: "random"
+    features: "cwt"
+    physics_regularization: false
+
+  - name: "SMOTE_FSL"
+    enabled: false
+    strategy: "smote"
+    features: "cwt"
+    physics_regularization: false
+
+  - name: "PI-FSL"
+    enabled: true
+    strategy: "psd-guided"
+    features: "cwt"
+    physics_regularization: true
+    transfer_finetune: true
+
+# -----------------------------
+# 8. Ablation studies
+# -----------------------------
+ablation_studies:
+  - component: "physics_regularization"
+    variations: [true, false]
+    description: "Ablation of physics-informed regularization"
+
+  - component: "psd_sampling"
+    variations: [true, false]
+    description: "Ablation of PSD-guided sampling"
