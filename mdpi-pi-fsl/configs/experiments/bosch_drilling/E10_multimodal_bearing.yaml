@@ -1,0 +1,28 @@
+description: "E10 - Rich Multimodal Transfer: Paderborn Bearing -> Bosch CNC"
+source:
+  dataset: pu
+  domain: "ALL"
+  health_states:
+    healthy: ["K001", "K002"]
+    local_fault: ["KI14", "KA04"]
+    distributed_fault: ["KA01", "KB23"]
+  signals:
+    - {name: "vibration", sampling_rate: 64000, resample_to: 2000}
+    - {name: "motor_current", sampling_rate: 64000, resample_to: 2000}
+target:
+  dataset: bosch
+  domain: "M01_OP07"
+few_shot:
+  n_way: 3
+  k_shot: 5
+  q_query: 16
+physics_regularization:
+  spectral_bands:
+    bpfo: [80, 120]
+    bpfi: [120, 160]
+  motor_current_loss:
+    enabled: true
+    lambda_current: 0.1
+    current_key: "motor_current"
+bench_command_example:
+  - "python bench/bench_run_one.py --method pi_fsl --src_dataset pu --tgt_dataset bosch --src_data_root /path/to/paderborn --tgt_data_root /path/to/bosch --source_domain ALL --target_domain M01_OP07 --n_way 3 --k_shot 5 --q_query 16 --modalities vibration,motor_current --motor_current_enabled --current_key motor_current"
