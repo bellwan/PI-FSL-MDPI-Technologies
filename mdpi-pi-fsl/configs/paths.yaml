@@ -7,11 +7,11 @@ datasets:
   bosch_mi_root: "D:/jb/datasets/bosch_milling"
 
 artifacts:
-  root: "D:/jb/mdpi-v08/artifacts"
-  results_jsonl_dir: "D:/jb/mdpi-v08/artifacts/results/jsonl"
-  tables_dir: "D:/jb/mdpi-v08/artifacts/results/tables"
-  figures_dir: "D:/jb/mdpi-v08/artifacts/figures"
-  models_dir: "D:/jb/mdpi-v08/artifacts/models"
+  root: "D:/jb/mdpi/artifacts"
+  results_jsonl_dir: "D:/jb/mdpi/artifacts/results/jsonl"
+  tables_dir: "D:/jb/mdpi/artifacts/results/tables"
+  figures_dir: "D:/jb/mdpi/artifacts/figures"
+  models_dir: "D:/jb/mdpi/artifacts/models"
 
 defaults:
   device: "cuda"
