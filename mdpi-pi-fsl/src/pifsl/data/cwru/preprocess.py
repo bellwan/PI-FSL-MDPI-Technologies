@@ -38,7 +38,6 @@ def load_CWRU_dataset(
                  .format(domain, normalization, time_steps, overlap_ratio))
 
     # dataset {class label : data list of this class}
-    # e.g., {0: [data1, data2, ...], 1: [data1, data2, ...], ...}
     dataset = {label: [] for label in labels}
 
     for label in labels:
