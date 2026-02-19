@@ -3,7 +3,6 @@ import re
 from typing import Any, Dict, List
 import pandas as pd
 
-# ---- patterns (match the IPYNB path parsing) ----
 _LBL_PAT = re.compile(r"[\\/](good|bad|healthy|worn)[\\/]", re.IGNORECASE)
 _M_PAT   = re.compile(r"(M\d{2})", re.IGNORECASE)
 _OP_PAT  = re.compile(r"(OP\d{2})", re.IGNORECASE)
