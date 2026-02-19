@@ -30,15 +30,12 @@ class PIFSLArgs:
     lr: float = 1e-3
     weight_decay: float = 0.0
 
-    # physics
     physics_every: int = 1
     physics_weight: float = 1.0
 
-    # modalities
     modalities: str = "vibration"             # e.g. "vibration,current"
     pad_missing_modalities: str = "zeros"    # zeros | duplicate_first
 
-    # spectral bands override (optional)
     spectral_bands: Optional[Dict[str, List[float]]] = None
     motor_current_enabled: bool = False
     lambda_current: float = 0.1
@@ -92,7 +89,6 @@ def run_pi_fsl(
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     model.train()
 
-    # Training loop
     for ep in range(1, int(args.train_episodes) + 1):
         Sx, Sy, Qx, Qy, raw_support, raw_support_y = train_set.sample_episode(seed=100000 + ep, return_raw=True)
 
@@ -107,11 +103,11 @@ def run_pi_fsl(
         loss = F.cross_entropy(scores, Qy)
 
         if phys is not None and args.physics_every > 0 and (ep % int(args.physics_every) == 0):
-            # feature maps: use query embeddings as a stable representation
+            # Use query embeddings as feature maps for regularization.
             with torch.no_grad():
                 feat_q = model.embed(Qx)
 
-            # Raw signals: pass through as-is; regularizer extracts modalities by key
+            # Raw windows passed through; regularizer selects modalities by key.
             raw_signals = []
             for w in raw_support:
                 if isinstance(w, dict):
@@ -131,7 +127,6 @@ def run_pi_fsl(
         loss.backward()
         opt.step()
 
-    # Evaluation on target episodes
     eval_stats = evaluate_relation(
         model=model,
         data=test_set,
@@ -144,7 +139,7 @@ def run_pi_fsl(
 
     out: Dict[str, float] = dict(eval_stats)
     if "acc" in out and isinstance(out["acc"], (float, int)):
-        # Try bootstrap CI across episodes by re-evaluating quickly
+        # Episode-wise CI via repeated sampling with fixed model parameters.
         accs = []
         for i in range(int(args.eval_episodes)):
             Sx, Sy, Qx, Qy, _, _ = test_set.sample_episode(seed=200000 + i)
