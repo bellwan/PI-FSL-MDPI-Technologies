@@ -41,19 +41,12 @@ from pifsl.core.sampling.psd_sampling import PSDGuidedSampler
 RawWindow = Union[np.ndarray, Dict[str, np.ndarray]]
 
 
-# -----------------------------
-# device
-# -----------------------------
 def _resolve_device(device_str: str) -> str:
     if str(device_str).lower() == "auto":
 
         return "cuda" if torch.cuda.is_available() else "cpu"
     return device_str
 
-
-# -----------------------------
-# helpers
-# -----------------------------
 def _first_len(x: Any) -> int:
     if isinstance(x, dict):
         for _, v in x.items():
@@ -77,7 +70,7 @@ def _concat_bundles(bundles: List[Bundle], name: str = "src") -> Bundle:
         y.extend(b.y)
         dom.extend(b.domain)
         fid.extend(b.file_id)
-    return Bundle(X=X, y=y, domain=dom, file_id=fid, fs=fs0)  # type: ignore[arg-type]
+    return Bundle(X=X, y=y, domain=dom, file_id=fid, fs=fs0) 
 
 
 def _parse_modalities(mods: str) -> List[str]:
@@ -192,9 +185,6 @@ def _sample_episode_bundle(bundle: Bundle, n_way: int, k_shot: int, q_query: int
         bundle.X, bundle.y, n_way=n_way, k_shot=k_shot, q_query=q_query, seed=seed
     )
 
-
-# -----------------------------
-# loaders
 # -----------------------------
 def _load_single_domain(dataset: str, data_root: str, domain: str, normalization: str, seed: int, args=None, max_files: Optional[int] = None) -> Bundle:
     dataset = dataset.lower()
@@ -588,10 +578,6 @@ def _load_pair(args) -> Tuple[Bundle, Bundle, float, int, float]:
     window_seconds = float(window_samples) / float(fs) if fs > 0 else float("nan")
     return src, tgt, fs, window_samples, window_seconds
 
-
-# -----------------------------
-# runners
-# -----------------------------
 def _run_pi_fsl(
     src: Bundle,
     tgt: Bundle,
@@ -604,9 +590,6 @@ def _run_pi_fsl(
     model = RelationNet(in_channels=len(modalities)).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
 
-    # -------------------------
-    # physics config 
-    # -------------------------
     phys = None
     if use_physics:
 
@@ -641,9 +624,6 @@ def _run_pi_fsl(
 
         phys = PhysicsInformedRegularizer(pr_cfg).to(device)
 
-    # -------------------------
-    # 1) episodic training on SRC (CE + optional Physics)
-    # -------------------------
     model.train()
     for ep in range(int(args.train_episodes)):
         sup_X, sup_y, qry_X, qry_y, sup_idx, qry_idx = _sample_episode_bundle(
@@ -771,9 +751,6 @@ def _run_pi_fsl(
             opt_t.step()
             sch_t.step()
 
-    # -------------------------
-    # 3) episodic evaluation on TGT (held-out if split succeeded, else full tgt)
-    # -------------------------
     model.eval()
     accs: List[float] = []
     baccs: List[float] = []
@@ -834,9 +811,6 @@ def _run_pi_fsl_matching(src: Bundle, tgt: Bundle, args, use_physics: bool) -> D
         )
         phys = PhysicsInformedRegularizer(pr_cfg).to(device)
 
-    # -------------------------
-    # 1) episodic training on SRC
-    # -------------------------
     enc.train()
     for ep in range(int(args.train_episodes)):
         sup_X, sup_y, qry_X, qry_y, sup_idx, qry_idx = _sample_episode_bundle(
@@ -878,9 +852,6 @@ def _run_pi_fsl_matching(src: Bundle, tgt: Bundle, args, use_physics: bool) -> D
         loss.backward()
         opt.step()
 
-    # -------------------------
-    # 2) optional target transfer fine-tune
-    # -------------------------
     do_transfer = bool(getattr(args, "transfer_finetune", False))
     ratio = float(getattr(args, "target_adapt_ratio", 0.40))
     ratio = min(max(ratio, 0.0), 1.0)
@@ -965,9 +936,6 @@ def _run_pi_fsl_matching(src: Bundle, tgt: Bundle, args, use_physics: bool) -> D
 
         enc.eval()
 
-    # -------------------------
-    # 3) episodic evaluation on TGT
-    # -------------------------
     enc.eval()
     accs, baccs, f1s = [], [], []
     with torch.no_grad():
@@ -1035,7 +1003,6 @@ def _run_pi_fsl_target_finetune(
         )
         phys = PhysicsInformedRegularizer(pr_cfg).to(device)
 
-    # (1) train encoder on SRC episodes
     enc.train()
     for ep in range(int(args.train_episodes)):
         sup_X, sup_y, qry_X, qry_y, sup_idx, qry_idx = _sample_episode_bundle(
@@ -1080,7 +1047,6 @@ def _run_pi_fsl_target_finetune(
         loss.backward()
         opt.step()
 
-    # (2) episodic evaluation on TGT with per-episode head fine-tune
     enc.eval()
     accs, baccs, f1s = [], [], []
     for ep in range(int(args.eval_episodes)):
@@ -1154,7 +1120,6 @@ def _run_protonet(src: Bundle, tgt: Bundle, args) -> Dict[str, Any]:
     enc = ConvEmbedding(in_channels=len(modalities)).to(device)
     opt = torch.optim.Adam(enc.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
 
-    # ----- train -----
     enc.train()
     for ep in range(int(args.train_episodes)):
         sup_X, sup_y, qry_X, qry_y = _sample_episode_bundle(
@@ -1187,7 +1152,6 @@ def _run_protonet(src: Bundle, tgt: Bundle, args) -> Dict[str, Any]:
         loss.backward()
         opt.step()
 
-    # ----- eval -----
     enc.eval()
     accs, baccs, f1s = [], [], []
     with torch.no_grad():
@@ -1257,7 +1221,6 @@ def _run_matchingnet(src: Bundle, tgt: Bundle, args) -> Dict[str, Any]:
     enc = ConvEmbedding(in_channels=len(modalities)).to(device)
     opt = torch.optim.Adam(enc.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
 
-    # ----- train -----
     enc.train()
     for ep in range(int(args.train_episodes)):
         sup_X, sup_y, qry_X, qry_y = _sample_episode_bundle(
@@ -1285,7 +1248,6 @@ def _run_matchingnet(src: Bundle, tgt: Bundle, args) -> Dict[str, Any]:
         loss.backward()
         opt.step()
 
-    # ----- eval -----
     enc.eval()
     accs, baccs, f1s = [], [], []
     with torch.no_grad():
@@ -1354,7 +1316,6 @@ def _run_supervised_target_only(tgt: Bundle, args) -> Dict[str, Any]:
         Xb = _windows_to_scalograms(Xb, tgt.fs, modalities, args.pad_missing_modalities)
         return Xb, torch.from_numpy(yb).long()
 
-    # ---- train ----
     enc.train(); head.train()
     rng = np.random.RandomState(int(args.seed) + 123)
     steps_per_epoch = max(1, int(np.ceil(train_idx.size / int(getattr(args, "sup_batch_size", 32)))))
@@ -1369,7 +1330,6 @@ def _run_supervised_target_only(tgt: Bundle, args) -> Dict[str, Any]:
             loss.backward()
             opt.step()
 
-    # ---- eval ----
     enc.eval(); head.eval()
     all_pred, all_true = [], []
     with torch.no_grad():
@@ -1449,16 +1409,11 @@ def _run_maml(src: Bundle, tgt: Bundle, args) -> Dict[str, Any]:
         args=maml_args,
     )
 
-
-# -----------------------------
-# CLI
-# -----------------------------
 def parse_args():
     p = argparse.ArgumentParser("Run one benchmark job and append to results.jsonl")
 
     p.add_argument("--project_root", type=str, default=".")
 
-    # mode: single dataset OR cross dataset
     p.add_argument("--dataset", type=str, choices=["bosch", "cwru", "hust_cn", "hust_vn", "pu", "bosch_mi", "bosch_milling", "scidata2025"])
     p.add_argument("--data_root", type=str)
 
@@ -1467,7 +1422,6 @@ def parse_args():
     p.add_argument("--src_data_root", type=str)
     p.add_argument("--tgt_data_root", type=str)
 
-    # optional: cap number of files/rows loaded (useful for very large datasets)
     p.add_argument("--max_files", type=int, default=None, help="Cap number of files/rows loaded in single-dataset mode")
     p.add_argument("--src_max_files", type=int, default=None, help="Cap number of files/rows loaded for src_dataset in cross-dataset mode")
     p.add_argument("--tgt_max_files", type=int, default=None, help="Cap number of files/rows loaded for tgt_dataset in cross-dataset mode")
@@ -1484,7 +1438,7 @@ def parse_args():
         type=str,
         required=True,
         choices=[
-            "pi_fsl",        # RelationNet + optional physics (episodic)
+            "pi_fsl",        # RelationNet + physics (episodic)
             "relationnet",   # RelationNet baseline (episodic, no physics)
             "protonet",      # classic ProtoNet (episodic)
             "matchingnet",   # classic MatchingNet (episodic)
@@ -1633,7 +1587,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # allow --out_jsonl as alias
+
     if args.out_jsonl:
         args.results_jsonl = args.out_jsonl
 
@@ -1644,10 +1598,6 @@ def main():
 
     src, tgt, fs, window_samples, window_seconds = _load_pair(args)
 
-    # ------------------------------------------------------------
-    # PSD-guided source balancing (match research_main behavior),
-    # but apply ONLY to PI-FSL method (and only for Bosch).
-    # ------------------------------------------------------------
     if str(args.method) == "pi_fsl":
         if bool(getattr(args, "psd_guided_balance", False)) and str(args.dataset).lower() == "bosch":
             v = str(getattr(args, "variant", "full"))

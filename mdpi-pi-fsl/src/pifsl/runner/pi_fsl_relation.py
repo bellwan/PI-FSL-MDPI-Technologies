@@ -66,7 +66,6 @@ def run_pi_fsl(
     raw_src = [np.asarray(x, dtype=np.float32).reshape(-1) for x in source.X]
     y_src_phys = [0 if int(v) == 0 else 1 for v in source.y]
 
-    # ---- train on SOURCE episodes
     model.train()
     for ep in range(int(cfg.train_episodes)):
         sup_X, sup_y, qry_X, qry_y, sup_idx, qry_idx = sample_episode_with_indices(
@@ -104,7 +103,6 @@ def run_pi_fsl(
         loss.backward()
         opt.step()
 
-    # ---- eval on TARGET episodes
     model.eval()
     accs, baccs, f1s = [], [], []
     with torch.no_grad():

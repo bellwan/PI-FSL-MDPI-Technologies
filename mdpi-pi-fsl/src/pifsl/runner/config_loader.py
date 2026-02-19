@@ -34,7 +34,7 @@ class PhysicsRegularizationConfig:
     lambda_envelope: float = 0.05
     spectral_bands: Optional[Dict[str, List[float]]] = None
 
-    # Optional motor-current loss (MCSA-style spectral consistency)
+    # motor-current loss (MCSA-style spectral consistency)
     motor_current_enabled: bool = False
     lambda_current: float = 0.1
     current_key: str = "motor_current"
@@ -49,7 +49,6 @@ class PhysicsRegularizationConfig:
                 "high": [200.0, 800.0],
             }
 
-        # If current bands aren't specified, reuse vibration bands
         if self.current_spectral_bands is None:
             self.current_spectral_bands = dict(self.spectral_bands)
 
