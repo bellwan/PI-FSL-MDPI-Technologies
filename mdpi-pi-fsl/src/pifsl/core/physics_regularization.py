@@ -8,10 +8,6 @@ import torch
 import torch.nn as nn
 
 
-# ---------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------
-
 @dataclass
 class PhysicsRegularizationConfig:
     enabled: bool = True
@@ -22,7 +18,7 @@ class PhysicsRegularizationConfig:
     lambda_envelope: float = 0.05
     spectral_bands: Optional[Dict[str, List[float]]] = None
 
-    # Optional motor-current loss (MCSA-style spectral consistency)
+    # motor-current loss (MCSA-style spectral consistency)
     motor_current_enabled: bool = False
     lambda_current: float = 0.1
     current_key: str = "motor_current"
@@ -62,8 +58,7 @@ class PhysicsInformedRegularizer(nn.Module):
         self.register_buffer("current_loss_accum", torch.tensor(0.0))
         self.register_buffer("steps", torch.tensor(0, dtype=torch.long))
 
-    # ------------------------- utilities -------------------------
-
+ 
     @staticmethod
     def _to_1d(x: Any) -> np.ndarray:
         a = np.asarray(x, dtype=np.float32).reshape(-1)
@@ -103,7 +98,6 @@ class PhysicsInformedRegularizer(nn.Module):
         s = float(arr.sum()) + 1e-12
         return (arr / s).astype(np.float32)
 
-    # ------------------------- loss terms -------------------------
 
     def _within_class_variance(self, feats: torch.Tensor, labels: List[int]) -> torch.Tensor:
         device = feats.device
@@ -178,8 +172,6 @@ class PhysicsInformedRegularizer(nn.Module):
         if not vals:
             return torch.tensor(0.0, device=device)
         return torch.tensor(float(np.mean(vals)), device=device, dtype=torch.float32)
-
-    # ------------------------- forward -------------------------
 
     def forward(
         self,

@@ -245,7 +245,7 @@ def sample_episode_with_indices_disjoint_by_file(
         X, y, file_id, n_way, k_shot, q_query, seed
     )
 
-    # Rebuild indices by re-sampling deterministically (same RNG path)
+    # Rebuild indices by re-sampling deterministically 
     rng = np.random.RandomState(seed)
     y_arr = np.asarray(y, dtype=np.int64)
     pools = np.asarray([_cwru_pool(f) for f in file_id], dtype=object)
