@@ -50,7 +50,6 @@ def _parse(stem: str) -> Tuple[str, int, int]:
 def _map_class(fault: str, label_mode: str) -> int:
     fc = fault.upper()
     # run_one exposes label_mode {binary,multiclass,simple,full}
-    # For HUST-VN, treat "multiclass" as "full"
     if label_mode == "multiclass":
         label_mode = "full"
 
