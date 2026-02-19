@@ -24,5 +24,3 @@ physics_regularization:
     enabled: true
     lambda_current: 0.1
     current_key: "motor_current"
-bench_command_example:
-  - "python bench/bench_run_one.py --method pi_fsl --src_dataset pu --tgt_dataset bosch --src_data_root /path/to/paderborn --tgt_data_root /path/to/bosch --source_domain ALL --target_domain M01_OP07 --n_way 3 --k_shot 5 --q_query 16 --modalities vibration,motor_current --motor_current_enabled --current_key motor_current"

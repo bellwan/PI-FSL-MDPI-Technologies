@@ -9,5 +9,3 @@ few_shot:
   n_way: 2
   k_shot: 5
   q_query: 16
-notes:
-  - "Use CWRU as bearing source pool, Bosch as milling/drilling target."

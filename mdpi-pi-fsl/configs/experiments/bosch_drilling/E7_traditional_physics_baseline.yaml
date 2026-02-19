@@ -2,5 +2,3 @@ description: "E7 - Traditional physics baseline (handcrafted + classic ML)"
 dataset: bosch
 scenario: baseline
 method: "handcrafted_xgboost"
-notes:
-  - "Compute handcrafted spectral/envelope features and train XGBoost or similar."

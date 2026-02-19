@@ -6,8 +6,8 @@ source:
     type: "CycleToFailureNormalized"
     bins:
       early:  [0.66, 1.0]
-      medium: [0.33, 0.66)
-      late:   [0.0,  0.33)
+      medium: [0.33, 0.66]
+      late:   [0.0,  0.33]
   signals:
     - {name: "vibration", sampling_rate: 25000, resample_to: 2000}
     - {name: "current",   sampling_rate: 500,   resample_to: 2000}
@@ -24,5 +24,3 @@ physics_regularization:
   spectral_bands:
     spindle: [0, 150]
     tooth_pass: [150, 400]
-bench_command_example:
-  - "python bench/bench_run_one.py --method pi_fsl --src_dataset bosch_mi --tgt_dataset bosch --src_data_root /path/to/scidata --tgt_data_root /path/to/bosch --source_domain ALL --target_domain M01_OP07 --n_way 3 --k_shot 5 --q_query 16 --modalities vibration,current"

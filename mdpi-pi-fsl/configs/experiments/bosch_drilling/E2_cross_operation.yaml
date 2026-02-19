@@ -1,26 +1,22 @@
 description: "E2 - Cross-operation generalization on M01 (OP07 → OP05)"
 seeds: [42, 123, 456, 789, 101112]
 
-# -----------------------------
-# 1. Domain specifications
-# -----------------------------
+# Domains
 source_domains:
   - machine: "M01"
     operation: "OP07"
-    # worn > 0 at [Aug-19, Aug-21, Feb-19]
+    # Worn>0 observed: Aug-19, Aug-21, Feb-19
     periods: ["Aug-19", "Feb-19", "Aug-21"]
     description: "Source operation OP07 on M01"
 
 target_domains:
   - machine: "M01"
     operation: "OP05"
-    # worn > 0 at [Aug-19, Feb-19, Feb-21]
+    # Worn>0 observed: Aug-19, Feb-19, Feb-21
     periods: ["Aug-19", "Feb-19", "Feb-21"]
     description: "Target operation OP05 on same machine M01"
 
-# -----------------------------
-# 2. Few-shot configuration
-# -----------------------------
+# Few-shot episodic setup
 few_shot_setting:
   n_way: 2
   k_shot: [1, 5]
@@ -28,16 +24,12 @@ few_shot_setting:
   episodes: 1200
   validation_episodes: 200
 
-# -----------------------------
-# 3. Model configuration
-# -----------------------------
+# Model
 model_config:
   name: "RelationNet"
   channels: [32, 32, 64, 64]
 
-# -----------------------------
-# 4. Training configuration
-# -----------------------------
+# Training
 training_config:
   optimizer: "Adam"
   learning_rate: 0.001
@@ -58,9 +50,7 @@ training_config:
     step_size: 100
     gamma: 0.5
 
-# -----------------------------
-# 5. Physics regularization
-# -----------------------------
+# Physics regularization
 physics_regularization:
   enabled: true
   lambda_energy: 0.1
@@ -71,15 +61,11 @@ physics_regularization:
     bearing: [75, 300]
     tool_wear: [300, 1000]
 
-# -----------------------------
-# 6. Evaluation configuration
-# -----------------------------
+# Evaluation
 evaluation_config:
   episodes: 200
 
-# -----------------------------
-# 7. Baseline methods
-# -----------------------------
+# Baselines
 baselines:
   - name: "Standard_FSL"
     enabled: false
@@ -100,9 +86,7 @@ baselines:
     physics_regularization: true
     transfer_finetune: true
 
-# -----------------------------
-# 8. Ablation studies
-# -----------------------------
+# Ablations
 ablation_studies:
   - component: "physics_regularization"
     variations: [true, false]
