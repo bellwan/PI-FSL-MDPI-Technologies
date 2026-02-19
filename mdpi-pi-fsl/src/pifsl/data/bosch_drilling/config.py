@@ -58,7 +58,6 @@ OP_SPEED_HZ = {"OP05":200, "OP07":200}
 ORDER_BASE_HZ = 200.0
 ORDER_NORM = {op: (ORDER_BASE_HZ / OP_SPEED_HZ[op]) for op in OP_SPEED_HZ}
 
-# ========================== CPD / CYCLE SCRIPT CONSTANTS ==========================
 BASE_PATH   = DATASET_DIR
 SAVE_DIR    = os.path.join(OUT_DIR, "plots_cpd_cycle")
 RESULTS_DIR = OUT_DIR
@@ -86,7 +85,7 @@ GEN_TIER2 = True
 GEN_CPD   = True
 GEN_CYCLE = True
 
-# ========================== PLOTS (phase 3.0) ==========================
+
 GENERATE_PLOTS = True
 PLOTS_DIR      = os.path.join(OUT_DIR, "plots_phase42")
 FEWSHOT_K      = K_SHOTS
