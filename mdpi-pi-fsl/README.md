@@ -10,26 +10,64 @@
   Reproduction entrypoints for the manuscript experiments.
 
 - `tools/`  
-  Optional utility script: `bosch_shift_quantification.py`.
+  utility script: `bosch_shift_quantification.py`.
 
 ## Setup
 
-### 1) Install dependencies
+### 1) Create an isolated environment (recommended)
 
-Python 3.10+ is recommended.
+From the repository root:
 
-Run (from repository root):
-`pip install -r requirements.txt`  
-`pip install -e .`
+```bash
+python -m venv .venv
+# Linux/macOS
+source .venv/bin/activate
+# Windows (PowerShell)
+# .venv\Scripts\Activate.ps1
+```
 
-### 2) Configure dataset and output paths
+### 2) Install dependencies
 
-Edit: `configs/paths.yaml`  
-Update dataset roots under `datasets:` and (optionally) change output locations under `artifacts:`.
+Install Python packages (from repository root):
 
+```bash
+pip install -r mdpi-pi-fsl/requirements.txt
+pip install -e mdpi-pi-fsl
+```
+
+Notes:
+- Python 3.10+ is recommended.
+- GPU is optional. If using CUDA, install a compatible PyTorch build for the system.
+- If `learn2learn` fails to install on a platform, use a matching PyTorch/Python combination or install build tools for the OS.
+
+### 3) Configure dataset and output paths
+
+Edit `mdpi-pi-fsl/configs/paths.yaml`:
+- Set dataset roots under `datasets:`
+- (Optional) set output locations under `artifacts:`
+
+Quick sanity check (verifies the package can import):
+
+```bash
+python -c "import pifsl; print('pifsl import ok')"
+```
 ## Reproducing manuscript experiments
 
 All scripts print the executed command lines to the console.
+### Running scripts reliably
+
+All manuscript scripts live in `mdpi-pi-fsl/scripts/`. Run them from the repository root so relative paths work:
+
+```bash
+python mdpi-pi-fsl/scripts/<script_name>.py
+```
+
+If a script depends on the configured dataset paths, confirm `mdpi-pi-fsl/configs/paths.yaml` is correct first.
+
+Re-running:
+- If an output directory already exists, some scripts may skip computation or append results depending on the script.
+- If results look stale, delete the corresponding artifact folder under the configured `artifacts:` paths and rerun.
+
 
 ### Phase A: Bosch drilling benchmark (E1 to E4)
 
@@ -68,3 +106,10 @@ Run:
 
 - Bosch drilling experiment definitions are in `configs/experiments/bosch_drilling/`.
 - The pipeline writes results to JSONL, and the table generator converts JSONL into summary tables.
+
+## Troubleshooting
+
+- **`FileNotFoundError` for datasets**: verify `mdpi-pi-fsl/configs/paths.yaml` points to the correct local dataset roots.
+- **CUDA device errors**: install a PyTorch build compatible with the GPU driver/CUDA version, or run on CPU by setting the script/config device to `"cpu"` where applicable.
+- **Permission errors writing outputs**: change `artifacts:` locations in `configs/paths.yaml` to a writable directory.
+- **`learn2learn` install issues**: confirm Python/PyTorch versions are supported, then reinstall in a clean environment.
