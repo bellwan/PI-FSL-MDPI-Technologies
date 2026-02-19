@@ -27,7 +27,6 @@ def _read_hust_cn_xls(path):
 
         return pd.read_html(p)[0]
 
-    # --- Text / delimited "xls" ---
     # Fast path: look for the "Data" marker in the first few hundred lines.
     try:
         with p.open("r", encoding="utf-8", errors="ignore") as f:
@@ -51,8 +50,6 @@ def _read_hust_cn_xls(path):
             engine="c",
         )
 
-    # Fallback: try common delimiters, but prefer tab first (comma will
-    # "succeed" even when the file is actually tab-delimited).
     for sep in ["\t", ",", ";", "|"]:
         try:
             return pd.read_csv(p, header=None, sep=sep, engine="python")

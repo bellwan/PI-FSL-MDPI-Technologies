@@ -54,9 +54,6 @@ def _parse_class_9(stem: str) -> int:
 def _read_vibration_excel(p: Path) -> np.ndarray:
     suffix = p.suffix.lower()
 
-    # -----------------------------
-    # 1) Try reading as Excel
-    # -----------------------------
     df = None
     if suffix == ".xlsx":
         try:
@@ -86,9 +83,6 @@ def _read_vibration_excel(p: Path) -> np.ndarray:
             best = best[np.isfinite(best)]
             return best.reshape(-1)
 
-    # -----------------------------
-    # 2) Fallback: parse as text and extract floats by regex
-    # -----------------------------
 
     float_re = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?")
 
