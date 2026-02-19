@@ -10,9 +10,8 @@ from scipy.signal import welch, resample
 from pifsl.data.bosch_drilling import config
 DATASET_KEYS_TRY = ["vibration_data", "AI0", "vibration", "acceleration"]
 
-# ------------------------------------------------------------------
 # H5 readers 
-# ------------------------------------------------------------------
+
 
 def read_h5_tri(fp: str) -> np.ndarray:
     fp_str = str(fp)
@@ -82,9 +81,8 @@ def read_any_h5(fp: Path | str) -> np.ndarray:
         return a[:, :3]
     return a.reshape(-1, 1)
 
-# ------------------------------------------------------------------
 # DSP helpers
-# ------------------------------------------------------------------
+
 def compute_psd(x: np.ndarray, fs: float, max_hz: float) -> Tuple[np.ndarray, np.ndarray]:
     fs = float(fs)
     max_hz = float(max_hz)
