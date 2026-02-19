@@ -8,13 +8,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Implementation of \
                                      Model-Agnostic Meta Learning on \
                                      Fault Diagnosis Datasets')
-    # Training parameters
     parser.add_argument('--ways', type=int, default=10,
                         help='Number of classes per task, default=10')
     parser.add_argument('--shots', type=int, default=5,
                         help='Number of support examples per class, default=1')
     
-    # Meta-learning parameters
     parser.add_argument('--meta_lr', type=float, default=0.001,
                         help='Outer loop learning rate, default=0.001')
     parser.add_argument('--fast_lr', type=float, default=0.1,
@@ -30,13 +28,11 @@ def parse_args():
     parser.add_argument('--first_order', type=bool, default=True,
                         help='Use the first-order approximation, default=True')
     
-    # Cuda and Random Seed
     parser.add_argument('--cuda', type=bool, default=True,
                         help='Use CUDA if available, default=True')
     parser.add_argument('--seed', type=int, default=42,
                         help='Random seed, default=42')
     
-    # Dataset parameters
     parser.add_argument('--data_dir_path', type=str, default='./data',
                         help='Path to the data directory, default=./data')
     parser.add_argument('--dataset', type=str, default='CWRU',
@@ -56,7 +52,6 @@ def parse_args():
     parser.add_argument('--test_task_num', type=int, default=100,
                         help='Number of samples per domain for testing, default=100')
     
-    # Curve plotting parameters
     parser.add_argument('--plot', type=bool, default=True,
                         help='Plot the learning curve, default=True')
     parser.add_argument('--plot_path', type=str, default='./images',
@@ -64,13 +59,11 @@ def parse_args():
     parser.add_argument('--plot_step', type=int, default=50,
                         help='Step for plotting the learning curve, default=50')
     
-    # Logging parameters
     parser.add_argument('--log', type=bool, default=True,
                         help='Log the training process, default=True')
     parser.add_argument('--log_path', type=str, default='./logs',
                         help='Directory to save the logs, default=./logs')
     
-    # Model checkpoint parameters
     parser.add_argument('--checkpoint', type=bool, default=True,
                         help='Save the model checkpoints, default=True')
     parser.add_argument('--checkpoint_path', type=str, default='./checkpoints',

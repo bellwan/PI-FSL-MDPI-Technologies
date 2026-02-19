@@ -27,7 +27,7 @@ class MAMLConfig:
 
 def _prep_batch(X: List[np.ndarray], idx: np.ndarray, device) -> torch.Tensor:
     arr = np.stack([X[int(i)] for i in idx]).astype(np.float32)
-    return torch.from_numpy(arr).unsqueeze(1).to(device)  # [B,1,L]
+    return torch.from_numpy(arr).unsqueeze(1).to(device)  # [B, 1, L]
 
 def _sample_binary_episode(X: List[np.ndarray], y: List[int], k: int, q: int, seed: int):
     rng = np.random.RandomState(seed)
@@ -54,7 +54,7 @@ def run_maml(source: DatasetBundle, target: DatasetBundle, cfg: MAMLConfig) -> D
     def named_params():
         return dict(model.named_parameters())
 
-    # ---- train (First-order MAML)
+    # Meta-train (first-order MAML) on source episodes.
     model.train()
     for ep in range(int(cfg.train_episodes)):
         sup_ix, Sy_np, qry_ix, Qy_np = _sample_binary_episode(source.X, source.y, cfg.k_shot, cfg.q_query, seed=ep)
@@ -77,7 +77,7 @@ def run_maml(source: DatasetBundle, target: DatasetBundle, cfg: MAMLConfig) -> D
         loss_q.backward()
         opt.step()
 
-    # ---- eval (adapt on target support, test on target query)
+    # Meta-test: adapt on target support, evaluate on target query.
     model.eval()
     accs, baccs, f1s = [], [], []
 
@@ -90,7 +90,7 @@ def run_maml(source: DatasetBundle, target: DatasetBundle, cfg: MAMLConfig) -> D
         Sy = torch.from_numpy(Sy_np).to(device)
         Qy = torch.from_numpy(Qy_np).to(device)
 
-        # Inner-loop adaptation NEEDS gradients, so do not wrap in torch.no_grad()
+        # Inner-loop adaptation requires gradients.
         params = named_params()
         with torch.enable_grad():
             for _ in range(cfg.inner_steps):
@@ -99,7 +99,7 @@ def run_maml(source: DatasetBundle, target: DatasetBundle, cfg: MAMLConfig) -> D
                 grads = torch.autograd.grad(loss_s, params.values(), create_graph=False)
                 params = {k: v - cfg.inner_lr * g.detach() for (k, v), g in zip(params.items(), grads)}
 
-        # Query evaluation can be no_grad
+        # Query evaluation can be torch.no_grad().
         with torch.no_grad():
             logits_q = functional_call(model, params, (Qx,))
             y_pred = torch.argmax(logits_q, dim=1).cpu().numpy()

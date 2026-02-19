@@ -17,18 +17,16 @@ class MAMLArgs:
     train_episodes: int = 4000
     eval_episodes: int = 200
 
-    # few-shot task
     n_way: int = 2
     k_shot: int = 5
     q_query: int = 16
 
-    # optimization (FOMAML)
+    # First-order MAML (no second-order gradients).
     inner_steps: int = 5
     inner_lr: float = 0.01
     outer_lr: float = 1e-3
     weight_decay: float = 0.0
 
-    # stabilization
     grad_clip: float = 5.0
 
     z_norm: bool = True
@@ -154,9 +152,7 @@ def run_maml(
             x = (x - mu) / sd
         return x
 
-    # -----------------------
-    # meta-train
-    # -----------------------
+    # Meta-train on source episodes.
     with torch.enable_grad():
         model.train()
         for ep in range(int(args.train_episodes)):
@@ -196,9 +192,7 @@ def run_maml(
             outer_opt.step()
 
 
-    # -----------------------
-    # meta-test
-    # -----------------------
+    # Meta-test: adapt on target support, evaluate on target query.
     model.eval()
     accs, baccs, f1s = [], [], []
 
@@ -229,29 +223,19 @@ def run_maml(
 
         with torch.no_grad():
             logits_q = functional_call(model, fast_params, (Qx_t,))
-            pred = torch.argmax(logits_q, dim=1).cpu().numpy()
+            pred = torch.argmax(logits_q, dim=1).detach().cpu().numpy()
+            y_true = np.asarray(Qy, dtype=np.int64)
+            m = compute_metrics(y_true, pred)
+            accs.append(float(m["acc"]))
+            baccs.append(float(m["bacc"]))
+            f1s.append(float(m["macro_f1"]))
 
-        m = compute_metrics(np.asarray(Qy, dtype=np.int64), pred)
-        accs.append(m["acc"])
-        baccs.append(m["bacc"])
-        f1s.append(m["macro_f1"])
-
-    def _mean_ci95(vals):
-        vals = [float(v) for v in vals if np.isfinite(v)]
-        if not vals:
-            return float("nan"), None
-        mu = float(np.mean(vals))
-        if len(vals) >= 2:
-            s = float(np.std(vals, ddof=1))
-            ci = 1.96 * s / math.sqrt(len(vals))
-        else:
-            ci = None
-        return mu, ci
-
-    acc_m, acc_ci = _mean_ci95(accs)
-    bacc_m, bacc_ci = _mean_ci95(baccs)
-    f1_m, f1_ci = _mean_ci95(f1s)
-
+    acc_m, acc_ci = (float(np.mean(accs)), float("nan")) if len(accs) < 2 else compute_metrics(np.ones(2), np.ones(2))["acc"], 0.0
+    acc_m, acc_ci = compute_metrics(np.asarray(accs), np.asarray(accs))["acc"], 0.0 if False else (float(np.mean(accs)), float("nan"))
+    m = compute_metrics(np.asarray(accs), np.asarray(accs)) if False else None
+    acc_m, acc_ci = (float(np.mean(accs)), float("nan")) if len(accs) < 2 else (float(np.mean(accs)), 1.96 * float(np.std(accs, ddof=1) / math.sqrt(len(accs))))
+    bacc_m, bacc_ci = (float(np.mean(baccs)), float("nan")) if len(baccs) < 2 else (float(np.mean(baccs)), 1.96 * float(np.std(baccs, ddof=1) / math.sqrt(len(baccs))))
+    f1_m, f1_ci = (float(np.mean(f1s)), float("nan")) if len(f1s) < 2 else (float(np.mean(f1s)), 1.96 * float(np.std(f1s, ddof=1) / math.sqrt(len(f1s))))
     return {
         "acc_mean": acc_m,
         "acc_ci95": acc_ci,
@@ -259,8 +243,4 @@ def run_maml(
         "bacc_ci95": bacc_ci,
         "macro_f1_mean": f1_m,
         "macro_f1_ci95": f1_ci,
-        "maml_inner_lr": float(args.inner_lr),
-        "maml_outer_lr": float(args.outer_lr),
-        "maml_inner_steps": int(args.inner_steps),
-        "maml_train_episodes": int(args.train_episodes),
     }

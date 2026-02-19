@@ -21,14 +21,14 @@ class CNN1D(nn.Module):
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=2, padding=0)
             )
-        self.avgpool = nn.AdaptiveAvgPool1d(64) # output (batch, 64, 64)
+        self.avgpool = nn.AdaptiveAvgPool1d(64) # output: [B, 64, 64]
         self.fc = nn.Linear(64*64, output_size)
 
     def forward(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        x = self.avgpool(x)  # [200, 64, 128]
+        x = self.avgpool(x)  # [B, 64, 64]
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x
