@@ -293,7 +293,7 @@ def _find_signal(arrs: Dict[str, Any], keywords: List[str], min_len: int = 128) 
         v4 = float(np.mean((xx * xx) * (xx * xx)) + 1e-12)
         return v4 / (v2 * v2)
 
-    # -------- 1) PU-specific: parse Y channel struct --------
+
     Y = None
     for k in ("Y", "y"):
         if k in arrs:
@@ -360,7 +360,7 @@ def _find_signal(arrs: Dict[str, Any], keywords: List[str], min_len: int = 128) 
             y_channels.sort(key=lambda t: int(t[1].size), reverse=True)
             return y_channels[0][1]
 
-    # -------- 4) Fallback: generic recursive scan (old behavior) --------
+
     vecs: List[Tuple[str, np.ndarray]] = []
     for k, v in arrs.items():
         vecs.extend(list(_iter_named_numeric_vectors(v, prefix=str(k), max_depth=7)))
@@ -409,7 +409,7 @@ def load_pu_source(
     codes_keep = {_norm_code(c) for c in (include_codes or [])} if include_codes else None
     settings_keep = {_norm_setting(s) for s in (include_settings or [])} if include_settings else None
 
-    # Debug counters (helps diagnose empty-window issues caused by naming/layout differences)
+
     stats: Dict[str, int] = {
         "total_mat_files": int(len(mats)),
         "scanned": 0,
@@ -436,7 +436,6 @@ def load_pu_source(
             break
         stats["scanned"] += 1
 
-        # ---- code ----
         code = _parse_bearing_code(fp.stem)
         if code is None:
             parent_code = _norm_code(fp.parent.name)
@@ -451,7 +450,6 @@ def load_pu_source(
             stats["skip_code_filter"] += 1
             continue
 
-        # ---- setting ----
         setting_raw = _parse_setting(fp.stem)
         setting = _norm_setting(setting_raw) if setting_raw else "UNKNOWN"
 
@@ -468,7 +466,6 @@ def load_pu_source(
             stats["skip_setting_filter"] += 1
             continue
 
-        # ---- label ----
         if use_binary:
             c = _norm_code(code)
             if c in healthy_set:
@@ -484,7 +481,6 @@ def load_pu_source(
                 stats["skip_no_label"] += 1
                 continue
 
-        # ---- load mat ----
         try:
             mat = loadmat(fp, squeeze_me=True, struct_as_record=False)
         except Exception:
